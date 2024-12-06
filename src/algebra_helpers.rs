@@ -582,6 +582,11 @@ impl<T: Scalar + Ord, const N: usize, U> PointGrid<T, N, U> {
             ),
         )
     }
+
+    pub fn dimensions_as_range(&self) -> PointRange<T, N> {
+        let (min, max) = self.dimensions();
+        PointRange::new(min, max + Point::one())
+    }
 }
 
 impl<T: Scalar + Ord + std::iter::Step + std::hash::Hash, U: fmt::Display> fmt::Display
