@@ -3,17 +3,17 @@ use advent_of_code::algebra_helpers::{Point2, Point2Direction, PointGrid, PointG
 advent_of_code::solution!(4);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum XMAS {
+enum Xmas {
     X,
     M,
     A,
     S,
 }
 
-const XMAS_WORD: &[XMAS] = &[XMAS::X, XMAS::M, XMAS::A, XMAS::S];
-const MAS_WORD: &[XMAS] = &[XMAS::M, XMAS::A, XMAS::S];
+const XMAS_WORD: &[Xmas] = &[Xmas::X, Xmas::M, Xmas::A, Xmas::S];
+const MAS_WORD: &[Xmas] = &[Xmas::M, Xmas::A, Xmas::S];
 
-struct WordGrid(PointGrid<isize, 2, XMAS>);
+struct WordGrid(PointGrid<isize, 2, Xmas>);
 
 impl TryFrom<&str> for WordGrid {
     type Error = ();
@@ -25,17 +25,17 @@ impl TryFrom<&str> for WordGrid {
                 grid.insert(
                     Point2::new(x as isize, y as isize),
                     match c {
-                        'X' => XMAS::X,
-                        'M' => XMAS::M,
-                        'A' => XMAS::A,
-                        'S' => XMAS::S,
+                        'X' => Xmas::X,
+                        'M' => Xmas::M,
+                        'A' => Xmas::A,
+                        'S' => Xmas::S,
                         _ => return Err(()),
                     },
                 );
             }
         }
 
-        Ok(Self { 0: grid })
+        Ok(Self(grid))
     }
 }
 
@@ -44,7 +44,7 @@ impl WordGrid {
         &self,
         position: &Point2<isize>,
         direction: &Point2Direction,
-        word: &[XMAS],
+        word: &[Xmas],
     ) -> bool {
         for (i, c) in word.iter().enumerate() {
             let current_position = position.get_point_in_direction(direction, i as isize);
@@ -55,10 +55,10 @@ impl WordGrid {
         true
     }
 
-    fn character_iter(&self, character_to_filter: XMAS) -> CharacterGridIterator {
+    fn character_iter(&self, character_to_filter: Xmas) -> CharacterGridIterator {
         CharacterGridIterator {
             grid: self,
-            character_to_filter: character_to_filter,
+            character_to_filter,
             iterator: self.0.iter_full_bounds(),
         }
     }
@@ -66,24 +66,24 @@ impl WordGrid {
     fn x_mas_iter(&self) -> XMASIterator {
         XMASIterator {
             grid: self,
-            iterator: self.character_iter(XMAS::M),
+            iterator: self.character_iter(Xmas::M),
         }
     }
 }
 
 struct CharacterGridIterator<'a> {
     grid: &'a WordGrid,
-    character_to_filter: XMAS,
+    character_to_filter: Xmas,
     iterator: PointGridIterator<isize, 2>,
 }
 
-impl<'a> Iterator for CharacterGridIterator<'a> {
-    type Item = (Point2<isize>, XMAS);
+impl Iterator for CharacterGridIterator<'_> {
+    type Item = (Point2<isize>, Xmas);
 
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some(p) = self.iterator.next() {
+        for p in self.iterator.by_ref() {
             if self.grid.0.get(&p) == Some(&self.character_to_filter) {
-                return Some((p.clone(), self.character_to_filter.clone()));
+                return Some((p, self.character_to_filter));
             }
         }
         None
@@ -95,11 +95,11 @@ struct XMASIterator<'a> {
     iterator: CharacterGridIterator<'a>,
 }
 
-impl<'a> Iterator for XMASIterator<'a> {
+impl Iterator for XMASIterator<'_> {
     type Item = (Point2<isize>, u32);
 
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some((p, _)) = self.iterator.next() {
+        for (p, _) in self.iterator.by_ref() {
             let mut count = 0;
             // check for x mas into southeast direction
             if self
@@ -145,9 +145,9 @@ pub fn part_one(input: &str) -> Option<u32> {
     let wordgrid = WordGrid::try_from(input).unwrap();
     let mut count = 0;
 
-    for (p1, _) in wordgrid.character_iter(XMAS::X) {
+    for (p1, _) in wordgrid.character_iter(Xmas::X) {
         for pd in Point2Direction::all_with_diagonals() {
-            if wordgrid.is_word_into_direction(&p1, &pd, XMAS_WORD) {
+            if wordgrid.is_word_into_direction(&p1, pd, XMAS_WORD) {
                 count += 1;
             }
         }

@@ -14,7 +14,7 @@ impl Display for DriveContent {
             DriveContent::Free(l) => (l, '.'),
             DriveContent::File(l, id) => (l, (id % 10).to_string().chars().next().unwrap()),
         };
-        for i in 0..length {
+        for _ in 0..length {
             write!(f, "{}", character)?;
         }
         write!(f, "")

@@ -56,7 +56,7 @@ impl FrequencyMap {
         max_repetitions: usize,
     ) -> Vec<Point2<isize>> {
         let mut result: HashSet<Point2<isize>> = HashSet::new();
-        for (_, antenna_positions) in &self.antennas_per_type {
+        for antenna_positions in self.antennas_per_type.values() {
             for (&antenna1, &antenna2) in antenna_positions.iter().tuple_combinations() {
                 let distance_vector = antenna2 - antenna1;
                 for i in 0..max_repetitions {

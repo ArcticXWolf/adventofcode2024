@@ -1,6 +1,5 @@
 use advent_of_code::algebra_helpers::{Point2, PointGrid, Rectangle};
 use itertools::Itertools;
-use num_traits::bounds;
 
 advent_of_code::solution!(14);
 
@@ -30,7 +29,7 @@ impl Robot {
     }
 }
 
-fn display_robot_grid(robots: &[Robot], bounds: Point2<isize>) {
+fn _display_robot_grid(robots: &[Robot], bounds: Point2<isize>) {
     for i in 0..(bounds.0[0] * bounds.0[1]) {
         let mut grid = PointGrid::default();
         for p in robots.iter().map(|r| r.position_after_steps(i, bounds)) {
@@ -41,7 +40,7 @@ fn display_robot_grid(robots: &[Robot], bounds: Point2<isize>) {
 }
 
 pub fn _part_one(input: &str, bounds: Point2<isize>) -> Option<u32> {
-    let robots = input.trim().lines().map(|l| Robot::from(l)).collect_vec();
+    let robots = input.trim().lines().map(Robot::from).collect_vec();
     let quadrants = vec![
         Rectangle::new(
             Point2::new(0, 0),
@@ -80,13 +79,13 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let _robots = input.trim().lines().map(|l| Robot::from(l)).collect_vec();
+    let _robots = input.trim().lines().map(Robot::from).collect_vec();
 
     // Since I didnt know how that picture looks, I printed all configurations
     // (until they cycle at 103 * 101) and searched for a configuration with
     // a long row of robots (via text editor).
     // TODO: Implement a real search in code.
-    // display_robot_grid(&_robots, Point2::new(101, 103));
+    // _display_robot_grid(&_robots, Point2::new(101, 103));
     Some(7286)
 }
 
@@ -106,6 +105,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, Some(7268));
+        assert_eq!(result, Some(7286));
     }
 }

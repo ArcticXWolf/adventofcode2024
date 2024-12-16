@@ -139,8 +139,8 @@ impl From<&str> for Garden {
 impl Garden {
     fn find_regions(&mut self) {
         for (pos, region_type) in self.plots.0.iter() {
-            if !self.regions.iter().any(|r| r.plots.0.contains_key(&pos)) {
-                let region = Region::from_grid_and_position(&self.plots, &pos, *region_type);
+            if !self.regions.iter().any(|r| r.plots.0.contains_key(pos)) {
+                let region = Region::from_grid_and_position(&self.plots, pos, *region_type);
                 self.regions.push(region);
             }
         }

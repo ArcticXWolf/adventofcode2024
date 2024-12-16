@@ -47,7 +47,7 @@ pub fn egcd(a: i64, b: i64) -> (i64, i64, i64) {
 }
 
 // Extended gcd for multiple numbers
-pub fn egcd_mn(numbers: &Vec<i64>) -> Option<(i64, Vec<i64>)> {
+pub fn egcd_mn(numbers: &[i64]) -> Option<(i64, Vec<i64>)> {
     if numbers.len() < 2 {
         return None;
     }

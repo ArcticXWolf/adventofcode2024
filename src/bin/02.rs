@@ -6,12 +6,12 @@ struct Report(Vec<u8>);
 
 impl From<&str> for Report {
     fn from(value: &str) -> Self {
-        Self {
-            0: value
+        Self(
+            value
                 .split_whitespace()
                 .filter_map(|s| s.parse::<u8>().ok())
                 .collect_vec(),
-        }
+        )
     }
 }
 
@@ -27,7 +27,7 @@ impl Report {
     fn is_distance_valid(&self) -> bool {
         self.0.iter().skip(1).zip(&self.0).all(|(l, r)| {
             let distance = (*r as i32 - *l as i32).abs();
-            distance >= 1 && distance <= 3
+            (1..=3).contains(&distance)
         })
     }
 
@@ -49,7 +49,7 @@ impl Report {
                 .map(|(_, v)| v)
                 .cloned()
                 .collect_vec();
-            if (Report { 0: numbers }).is_safe() {
+            if Report(numbers).is_safe() {
                 return true;
             }
         }
@@ -63,7 +63,7 @@ pub fn part_one(input: &str) -> Option<u32> {
         input
             .trim()
             .lines()
-            .map(|l| Report::from(l))
+            .map(Report::from)
             .filter(|r| r.is_safe())
             .count() as u32,
     )
@@ -74,7 +74,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         input
             .trim()
             .lines()
-            .map(|l| Report::from(l))
+            .map(Report::from)
             .filter(|r| r.is_safe_with_problem_dampener())
             .count() as u32,
     )

@@ -17,14 +17,14 @@ impl Instruction {
         for capture in i_regex.captures_iter(input) {
             if let Some(x) = capture.get(2) {
                 if let Some(y) = capture.get(3) {
-                    results.push(Instruction::Multiplication {
-                        0: x.as_str().parse::<u32>().unwrap(),
-                        1: y.as_str().parse::<u32>().unwrap(),
-                    });
+                    results.push(Instruction::Multiplication(
+                        x.as_str().parse::<u32>().unwrap(),
+                        y.as_str().parse::<u32>().unwrap(),
+                    ));
                 }
-            } else if let Some(_) = capture.get(4) {
+            } else if capture.get(4).is_some() {
                 results.push(Instruction::Do);
-            } else if let Some(_) = capture.get(5) {
+            } else if capture.get(5).is_some() {
                 results.push(Instruction::Dont);
             } else {
                 unreachable!()

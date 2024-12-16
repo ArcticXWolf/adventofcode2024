@@ -1,4 +1,4 @@
-use std::{collections::HashSet, fmt::Display};
+use std::fmt::Display;
 
 use advent_of_code::algebra_helpers::{Point2, Point2Direction, PointGrid};
 use itertools::Itertools;
@@ -35,7 +35,7 @@ impl TopoMap {
         let mut queue = vec![];
         let mut results = vec![];
 
-        if let Some(start_level) = self.0.get(&start_pos) {
+        if let Some(start_level) = self.0.get(start_pos) {
             queue.push((*start_pos, *start_level));
         }
 
@@ -46,7 +46,7 @@ impl TopoMap {
             }
 
             for pd in Point2Direction::all() {
-                let new_pos = current_pos.get_point_in_direction(&pd, 1);
+                let new_pos = current_pos.get_point_in_direction(pd, 1);
                 if let Some(new_level) = self.0.get(&new_pos) {
                     if new_level.saturating_sub(current_level) == 1 {
                         queue.push((new_pos, *new_level));
@@ -61,10 +61,7 @@ impl TopoMap {
     fn get_trailheads(&self) -> Vec<Point2<isize>> {
         self.0
             .iter_full_bounds()
-            .filter_map(|p| match self.0.get(&p) {
-                Some(l) if *l == 0 => Some(p),
-                _ => None,
-            })
+            .filter(|p| self.0.get(p) == Some(&0))
             .collect_vec()
     }
 

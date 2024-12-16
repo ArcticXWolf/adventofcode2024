@@ -69,7 +69,7 @@ pub fn part_one(input: &str) -> Option<isize> {
     let equations = input
         .trim()
         .split("\n\n")
-        .map(|s| Equation::from(s))
+        .map(Equation::from)
         .collect::<Vec<Equation>>();
 
     Some(equations.iter().filter_map(|e| e.token_cost()).sum())
@@ -79,7 +79,7 @@ pub fn part_two(input: &str) -> Option<isize> {
     let mut equations = input
         .trim()
         .split("\n\n")
-        .map(|s| Equation::from(s))
+        .map(Equation::from)
         .collect::<Vec<Equation>>();
 
     for e in equations.iter_mut() {

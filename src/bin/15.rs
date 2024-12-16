@@ -94,9 +94,9 @@ impl Display for Warehouse {
                     write!(f, ".")?;
                 }
             }
-            writeln!(f, "")?;
+            writeln!(f)?;
         }
-        writeln!(f, "")
+        writeln!(f)
     }
 }
 

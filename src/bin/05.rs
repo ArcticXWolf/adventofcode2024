@@ -47,22 +47,17 @@ impl Update {
     }
 
     fn is_valid_with_ruleset(&self, rules: &[Rule]) -> bool {
-        rules.iter().all(|r| self.is_valid_with_rule(&r))
+        rules.iter().all(|r| self.is_valid_with_rule(r))
     }
 
     fn middle_page_number(&self) -> u32 {
         let middle_element = self.pages.len() / 2;
-        self.pages
-            .iter()
-            .skip(middle_element)
-            .next()
-            .unwrap()
-            .clone()
+        *self.pages.get(middle_element).unwrap()
     }
 
     fn fix_with_ruleset(&mut self, rules: &[Rule]) {
         while !self.is_valid_with_ruleset(rules) {
-            let failed_rule = match rules.iter().find(|r| !self.is_valid_with_rule(&r)) {
+            let failed_rule = match rules.iter().find(|r| !self.is_valid_with_rule(r)) {
                 Some(r) => r,
                 None => return,
             };

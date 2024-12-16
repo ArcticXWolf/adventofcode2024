@@ -38,7 +38,6 @@ fn apply_rules(number: u64) -> Vec<u64> {
 
 pub fn part_one(input: &str) -> Option<u64> {
     let numbers = input
-        .trim()
         .split_whitespace()
         .map(|n| n.parse::<u64>().unwrap())
         .collect_vec();
@@ -53,7 +52,6 @@ pub fn part_one(input: &str) -> Option<u64> {
 
 pub fn part_two(input: &str) -> Option<u64> {
     let numbers = input
-        .trim()
         .split_whitespace()
         .map(|n| n.parse::<u64>().unwrap())
         .collect_vec();
