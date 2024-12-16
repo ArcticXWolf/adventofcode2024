@@ -103,7 +103,7 @@ mod tests {
 
     #[test]
     fn test_egcd_mn() {
-        assert_eq!(egcd_mn(&vec![20, 15, 10]), Some((5, vec![1, -1, 0])));
-        assert_eq!(egcd_mn(&vec![19, 31, 59]), Some((1, vec![-13, 8, 0])));
+        assert_eq!(egcd_mn(&[20, 15, 10]), Some((5, vec![1, -1, 0])));
+        assert_eq!(egcd_mn(&[19, 31, 59]), Some((1, vec![-13, 8, 0])));
     }
 }
