@@ -41,7 +41,7 @@ fn _display_robot_grid(robots: &[Robot], bounds: Point2<isize>) {
 
 pub fn _part_one(input: &str, bounds: Point2<isize>) -> Option<u32> {
     let robots = input.trim().lines().map(Robot::from).collect_vec();
-    let quadrants = vec![
+    let quadrants = [
         Rectangle::new(
             Point2::new(0, 0),
             Point2::new(bounds.0[0] / 2, bounds.0[1] / 2),
@@ -60,7 +60,6 @@ pub fn _part_one(input: &str, bounds: Point2<isize>) -> Option<u32> {
         ),
     ];
 
-    println!("Quadrants: {:?}", quadrants);
     let safety_factor = quadrants
         .iter()
         .map(|q| {
