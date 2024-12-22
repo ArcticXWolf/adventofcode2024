@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use num_traits::Num;
+use num_traits::{Num, Signed};
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::ops::{self, Index, IndexMut};
@@ -280,10 +280,6 @@ impl<T: Scalar, const N: usize> Point<T, N> {
         (self - other).length_euclid()
     }
 
-    pub fn distance_manhattan_from(self, other: Self) -> T {
-        (self - other).length_manhattan()
-    }
-
     pub fn length_euclid_squared(&self) -> T {
         self.0
             .iter()
@@ -296,10 +292,6 @@ impl<T: Scalar, const N: usize> Point<T, N> {
         T: Float,
     {
         self.length_euclid_squared().sqrt()
-    }
-
-    pub fn length_manhattan(&self) -> T {
-        self.0.iter().fold(T::zero(), |acc, e| acc + *e)
     }
 
     pub fn dot(self, other: Self) -> T {
@@ -318,6 +310,19 @@ impl<T: Scalar, const N: usize> Point<T, N> {
 
     pub fn vec_to(self, other: Self) -> Point<T, N> {
         other - self
+    }
+}
+
+impl<T: Scalar, const N: usize> Point<T, N>
+where
+    T: Signed,
+{
+    pub fn distance_manhattan_from(self, other: Self) -> T {
+        (self - other).length_manhattan()
+    }
+
+    pub fn length_manhattan(&self) -> T {
+        self.0.iter().fold(T::zero(), |acc, e| acc + (*e).abs())
     }
 }
 
