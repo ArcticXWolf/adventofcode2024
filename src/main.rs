@@ -1,5 +1,5 @@
 use advent_of_code::template::commands::{all, download, read, scaffold, solve, time};
-use args::{parse, AppArguments};
+use args::{AppArguments, parse};
 
 #[cfg(feature = "today")]
 use advent_of_code::template::Day;
@@ -106,7 +106,11 @@ fn main() {
             AppArguments::Time { day, all, store } => time::handle(day, all, store),
             AppArguments::Download { day } => download::handle(day),
             AppArguments::Read { day } => read::handle(day),
-            AppArguments::Scaffold { day, download, overwrite } => {
+            AppArguments::Scaffold {
+                day,
+                download,
+                overwrite,
+            } => {
                 scaffold::handle(day, overwrite);
                 if download {
                     download::handle(day);

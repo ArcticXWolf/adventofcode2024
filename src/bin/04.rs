@@ -55,7 +55,7 @@ impl WordGrid {
         true
     }
 
-    fn character_iter(&self, character_to_filter: Xmas) -> CharacterGridIterator {
+    fn character_iter(&self, character_to_filter: Xmas) -> CharacterGridIterator<'_> {
         CharacterGridIterator {
             grid: self,
             character_to_filter,
@@ -63,7 +63,7 @@ impl WordGrid {
         }
     }
 
-    fn x_mas_iter(&self) -> XMASIterator {
+    fn x_mas_iter(&self) -> XMASIterator<'_> {
         XMASIterator {
             grid: self,
             iterator: self.character_iter(Xmas::M),
