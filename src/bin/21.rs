@@ -1,5 +1,9 @@
 #![feature(trim_prefix_suffix)]
-use std::fmt::{Display, Write};
+use std::{
+    collections::HashMap,
+    fmt::{Display, Write},
+    usize,
+};
 
 use advent_of_code::algebra_helpers::{Point2, Point2Direction};
 use itertools::Itertools;
@@ -133,69 +137,6 @@ fn parse_code(code: &str) -> Vec<NumericKeypadButton> {
         .collect::<Vec<NumericKeypadButton>>()
 }
 
-fn navigate_path_numerical(buttons: Vec<NumericKeypadButton>) -> Vec<Vec<DirectionalKeypadButton>> {
-    navigate_path(
-        NumericKeypadButton::Accept.button_position(),
-        &buttons
-            .iter()
-            .map(|b| b.button_position())
-            .collect::<Vec<_>>(),
-        &NumericKeypadButton::forbidden_positions(),
-    )
-}
-
-fn navigate_paths_directional(
-    paths: &[Vec<DirectionalKeypadButton>],
-) -> Vec<Vec<DirectionalKeypadButton>> {
-    paths
-        .iter()
-        .map(|path| navigate_path_directional(path))
-        .flatten()
-        .collect::<Vec<_>>()
-}
-
-fn navigate_path_directional(
-    path: &[DirectionalKeypadButton],
-) -> Vec<Vec<DirectionalKeypadButton>> {
-    navigate_path(
-        DirectionalKeypadButton::Accept.button_position(),
-        &path.iter().map(|d| d.button_position()).collect::<Vec<_>>(),
-        &DirectionalKeypadButton::forbidden_positions(),
-    )
-}
-
-fn navigate_path(
-    source: Point2<isize>,
-    path: &[Point2<isize>],
-    forbidden_positions: &[Point2<isize>],
-) -> Vec<Vec<DirectionalKeypadButton>> {
-    let mut possible_paths: Vec<Vec<DirectionalKeypadButton>> = vec![vec![]];
-    let mut current: Point2<isize> = source;
-
-    for destination in path {
-        let new_paths = get_paths_to_position(current, *destination, forbidden_positions);
-        possible_paths = possible_paths
-            .into_iter()
-            .map(|p| {
-                new_paths
-                    .iter()
-                    .cloned()
-                    .map(|np| {
-                        p.iter()
-                            .chain(&np)
-                            .cloned()
-                            .collect::<Vec<DirectionalKeypadButton>>()
-                    })
-                    .collect::<Vec<_>>()
-            })
-            .flatten()
-            .collect::<Vec<_>>();
-        current = *destination;
-    }
-
-    possible_paths
-}
-
 fn get_paths_to_position(
     source: Point2<isize>,
     destination: Point2<isize>,
@@ -244,51 +185,92 @@ fn get_paths_to_position(
 
 fn calculate_min_path_length(
     buttons: Vec<NumericKeypadButton>,
-    amount_of_intermediate_robots: u32,
-) -> u32 {
-    let mut paths = navigate_path_numerical(buttons);
-    let mut current_min_length = paths.iter().map(|p| p.len()).min().unwrap();
-    paths = paths
-        .into_iter()
-        .filter(|p| p.len() <= current_min_length)
-        .collect();
+    amount_directional_keypads: usize,
+) -> usize {
+    let mut current_button = NumericKeypadButton::Accept;
+    let mut length = 0;
 
-    for _ in 0..amount_of_intermediate_robots {
-        paths = navigate_paths_directional(&paths);
-        current_min_length = paths.iter().map(|p| p.len()).min().unwrap();
-        paths = paths
-            .into_iter()
-            .filter(|p| p.len() <= current_min_length)
-            .collect();
+    for button in buttons {
+        let mut best_length = usize::MAX;
+        for path in get_paths_to_position(
+            current_button.button_position(),
+            button.button_position(),
+            &NumericKeypadButton::forbidden_positions(),
+        ) {
+            let mut current_length = 0;
+            let mut current_button = DirectionalKeypadButton::Accept;
+            for b in path {
+                current_length += calculate_min_path_length_recursive(
+                    current_button,
+                    b,
+                    amount_directional_keypads,
+                    &mut HashMap::new(),
+                );
+                current_button = b;
+            }
+            if current_length < best_length {
+                best_length = current_length;
+            }
+        }
+        length += best_length;
+        current_button = button;
     }
 
-    paths = navigate_paths_directional(&paths);
-    current_min_length = paths.iter().map(|p| p.len()).min().unwrap();
-    paths = paths
-        .into_iter()
-        .filter(|p| p.len() <= current_min_length)
-        .collect();
-    current_min_length as u32
+    length
+}
+
+fn calculate_min_path_length_recursive(
+    from_button: DirectionalKeypadButton,
+    to_button: DirectionalKeypadButton,
+    depth: usize,
+    cache: &mut HashMap<(DirectionalKeypadButton, DirectionalKeypadButton, usize), usize>,
+) -> usize {
+    if depth == 0 {
+        return 1;
+    }
+    if let Some(val) = cache.get(&(from_button, to_button, depth)) {
+        return *val;
+    }
+
+    let mut best_length = usize::MAX;
+    for path in get_paths_to_position(
+        from_button.button_position(),
+        to_button.button_position(),
+        &DirectionalKeypadButton::forbidden_positions(),
+    ) {
+        let mut current_length = 0;
+        let mut current_button = DirectionalKeypadButton::Accept;
+        for b in path {
+            current_length +=
+                calculate_min_path_length_recursive(current_button, b, depth - 1, cache);
+            current_button = b;
+        }
+        if current_length < best_length {
+            best_length = current_length;
+        }
+    }
+    cache.insert((from_button, to_button, depth), best_length);
+    best_length
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
     let mut result = 0;
     for code in input.lines() {
-        let numerical = code.trim_suffix('A').parse::<u32>().unwrap();
-        let length = calculate_min_path_length(parse_code(code), 1);
+        let numerical = code.trim_suffix('A').parse::<usize>().unwrap();
+        let length = calculate_min_path_length(parse_code(code), 2);
         result += numerical * length;
     }
-    Some(result)
+    Some(result as u32)
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(input: &str) -> Option<usize> {
     let mut result = 0;
     for code in input.lines() {
-        let numerical = code.trim_suffix('A').parse::<u32>().unwrap();
+        let numerical = code.trim_suffix('A').parse::<usize>().unwrap();
         let length = calculate_min_path_length(parse_code(code), 25);
         result += numerical * length;
     }
-    Some(result)
+    Some(result as usize)
 }
 
 #[cfg(test)]
@@ -304,7 +286,7 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(154115708116294));
     }
 
     #[test]
@@ -358,33 +340,21 @@ mod tests {
     }
 
     #[test]
-    fn test_navigate_path() {
-        let mut paths = navigate_path_numerical(parse_code("179A"));
-        assert_eq!(paths.len(), 2);
-
-        paths = navigate_path_numerical(parse_code("029A"));
-        assert_eq!(paths.len(), 3);
-
-        paths = navigate_paths_directional(&paths);
-        assert_eq!(paths.len(), 128);
-    }
-
-    #[test]
     fn test_known_codes() {
         let mut code = "029A";
         println!("Code: {}", code);
         assert_eq!(calculate_min_path_length(parse_code(code), 2), 68);
         code = "980A";
         println!("Code: {}", code);
-        assert_eq!(calculate_min_path_length(parse_code(code), 1), 60);
+        assert_eq!(calculate_min_path_length(parse_code(code), 2), 60);
         code = "179A";
         println!("Code: {}", code);
-        assert_eq!(calculate_min_path_length(parse_code(code), 1), 68);
+        assert_eq!(calculate_min_path_length(parse_code(code), 2), 68);
         code = "456A";
         println!("Code: {}", code);
-        assert_eq!(calculate_min_path_length(parse_code(code), 1), 64);
+        assert_eq!(calculate_min_path_length(parse_code(code), 2), 64);
         code = "379A";
         println!("Code: {}", code);
-        assert_eq!(calculate_min_path_length(parse_code(code), 1), 64);
+        assert_eq!(calculate_min_path_length(parse_code(code), 2), 64);
     }
 }
